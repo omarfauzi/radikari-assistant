@@ -46,9 +46,23 @@ lerna-debug.log*
 *.sw?
 .vercel
 
+# Vite Cache
+.vite/
+
+# Linting & Formatting
+.eslintcache
+
+# Google Cloud Credentials (Jika ada file kunci terpisah)
+credentials.json
+service-account.json
+
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
 # Testing
 /coverage
+
+# Radikari Secrets (WAJIB)
+openclaw.json
+exec-approvals.json

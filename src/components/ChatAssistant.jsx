@@ -30,18 +30,50 @@ export default function ChatAssistant({ user, activeMenu }) {
     }
   };
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-    setMessages([...messages, { text: input, isBot: false }]);
+
+    // 1. Tampilkan pesan user di UI
+    const userMessage = input;
+    setMessages(prev => [...prev, { text: userMessage, isBot: false }]);
     setInput("");
-    
-    setTimeout(() => {
+
+    try {
+      const response = await fetch('/api/v1/chat/completions', { 
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${import.meta.env.VITE_OPENCLAW_TOKEN}`
+      },
+      body: JSON.stringify({ 
+        model: "openclaw", 
+        messages: [
+          { 
+            role: "user", 
+            content: `[Context: User ${firstName}, Role ${userRole}, Divisi ${activeMenu}] ${userMessage}` 
+          }
+        ],
+        stream: false 
+      }),
+    });
+
+      if (!response.ok) throw new Error('Gateway Error');
+
+      const data = await response.json();
+
+      // 2. Ambil jawaban dari struktur data OpenAI
+      const botReply = data.choices?.[0]?.message?.content || "DeepSeek tidak memberikan respons.";
+      
+      setMessages(prev => [...prev, { text: botReply, isBot: true }]);
+
+    } catch (error) {
+      // Penanganan jika Docker/Gateway mati
       setMessages(prev => [...prev, { 
-        text: `Command diterima. Menganalisis sistem sebagai ${userRole}...`, 
+        text: "❌ Koneksi ke Node terputus. Pastikan Docker OpenClaw di port 18789 sudah jalan!", 
         isBot: true 
       }]);
-    }, 1000);
+    }
   };
 
   return (
