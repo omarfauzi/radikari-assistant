@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 # SESUAIKAN KREDENSIAL INI:
 # Format: postgresql://[username_pgadmin]:[password_pgadmin]@localhost:5432/openclaw_db
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:R4jawal_1@localhost:5432/openclaw_db"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:R4jawal_1@localhost:5433/openclaw_db"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
