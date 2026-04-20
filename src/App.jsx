@@ -16,6 +16,7 @@ import Login from './pages/Login';
 import HRDashboard from './pages/HRDashboard'; 
 import FinanceDashboard from './pages/FinanceDashboard';
 import MarketingDashboard from './pages/MarketingDashboard';
+import AdminDashboard from './pages/AdminDashboard'; // <-- IMPORT HALAMAN BARU
 
 export default function App() {
   const [user, setUser] = useState(null); 
@@ -26,7 +27,7 @@ export default function App() {
   // 1. STATE UNTUK DATA API
   const [allLogs, setAllLogs] = useState([]);
 
-  // 2. PULL DATA DARI BACKEND SAAT APLIKASI DIMUAT
+  // 2. PULL DATA DARI BACKEND
   useEffect(() => {
     const fetchLogs = async () => {
       try {
@@ -40,13 +41,12 @@ export default function App() {
       }
     };
 
-    // Hanya tarik data jika user sudah login (opsional, tapi lebih efisien)
     if (user) {
       fetchLogs();
     }
   }, [user]);
 
-  // 3. PUSH UPDATE KE BACKEND SAAT TOMBOL DITEKAN
+  // 3. PUSH UPDATE KE BACKEND
   const handleProcessAction = async (id, newStatus) => {
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/approval-logs/${id}`, {
@@ -56,11 +56,10 @@ export default function App() {
       });
 
       if (response.ok) {
-        // Update UI secara lokal agar responsif tanpa perlu reload halaman
         setAllLogs(prev => prev.map(log => log.id === id ? { ...log, status: newStatus } : log));
         setSelectedLog(null);
       } else {
-        alert("Gagal memproses aksi. Periksa koneksi ke database.");
+        alert("Gagal memproses aksi.");
       }
     } catch (error) {
       console.error("Error saat memproses aksi:", error);
@@ -74,6 +73,12 @@ export default function App() {
 
   // --- LOGIC RENDER CONTENT ---
   const renderContent = () => {
+    // A. LOGIKA KHUSUS SUPER ADMIN (ADMIN DASHBOARD)
+    if (user?.role === 'SUPER_ADMIN' && activeMenu === 'dashboard') {
+      return <AdminDashboard allLogs={allLogs} user={user} />;
+    }
+
+    // B. HALAMAN APPROVAL (UMUM)
     if (activeMenu.toLowerCase().includes('approval')) {
       return (
         <ApprovalDashboardPage 
@@ -85,6 +90,7 @@ export default function App() {
       );
     }
     
+    // C. ROUTING PER MENU
     switch (activeMenu) {
       case 'dashboard': return <MonitoringDashboard user={user} />;
       case 'hr': return <HRDashboard />;
@@ -141,10 +147,8 @@ function ApprovalDashboardPage({ allLogs, handleProcessAction, selectedLog, setS
   const [statusFilter, setStatusFilter] = useState("All");
 
   const filteredLogs = allLogs.filter((log) => {
-    // Memastikan id dan user tidak undefined/null sebelum di-lowercase
     const logId = log.id ? String(log.id).toLowerCase() : "";
     const logUser = log.user ? log.user.toLowerCase() : "";
-    
     const matchesSearch = logId.includes(searchQuery.toLowerCase()) || logUser.includes(searchQuery.toLowerCase());
     
     let matchesStatus = statusFilter === "All" || statusFilter === "Semua Status" 
@@ -180,7 +184,6 @@ function ApprovalDashboardPage({ allLogs, handleProcessAction, selectedLog, setS
         />
       </div>
 
-      {/* MODAL */}
       {selectedLog && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
           <div className="bg-[#0f172a] border border-white/10 rounded-3xl w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-200 p-8">
