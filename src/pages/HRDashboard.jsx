@@ -1,33 +1,25 @@
 import React, { useState, useEffect } from 'react';
 
 export default function HRDashboard() {
-  // 1. State penampung data
   const [approvalLogs, setApprovalLogs] = useState([]);
-  const [historyLogs, setHistoryLogs] = useState([]); // State untuk menampung history
+  const [historyLogs, setHistoryLogs] = useState([]); 
   const [isLoading, setIsLoading] = useState(true);
-  
-  // State untuk mengontrol tab mana yang sedang aktif ('pending' atau 'history')
   const [activeTab, setActiveTab] = useState('pending'); 
 
-  // 2. Fungsi untuk menarik data dari FastAPI (Mengambil Pending dan History sekaligus)
   const fetchLogs = async () => {
     try {
       setIsLoading(true);
-      
-      // Ambil data Pending
       const resPending = await fetch('http://127.0.0.1:8000/api/approval-logs');
       const dataPending = await resPending.json();
       if (dataPending.status === 'success') {
         setApprovalLogs(dataPending.data);
       }
 
-      // Ambil data History
       const resHistory = await fetch('http://127.0.0.1:8000/api/approval-history');
       const dataHistory = await resHistory.json();
       if (dataHistory.status === 'success') {
         setHistoryLogs(dataHistory.data);
       }
-
     } catch (error) {
       console.error("Gagal mengambil data log:", error);
     } finally {
@@ -39,7 +31,6 @@ export default function HRDashboard() {
     fetchLogs();
   }, []);
 
-  // 3. Fungsi untuk mengeksekusi aksi Approve/Reject
   const handleApprovalAction = async (id, actionStatus) => {
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/approval-logs/${id}`, {
@@ -49,7 +40,6 @@ export default function HRDashboard() {
       });
 
       if (response.ok) {
-        // Refresh tabel agar data pindah dari tab Pending ke tab History
         fetchLogs();
       }
     } catch (error) {
@@ -57,14 +47,12 @@ export default function HRDashboard() {
     }
   };
 
-  // 4. Update data statis
   const stats = [
-    { label: 'Total Personnel', value: '124', color: 'text-white' },
-    { label: 'Active Node', value: '89', color: 'text-emerald-500' },
-    { label: 'Pending Approval', value: approvalLogs.length.toString(), color: 'text-red-500' },
+    { label: 'Total Personnel', value: '124', color: 'text-slate-900 dark:text-white' },
+    { label: 'Active Node', value: '89', color: 'text-emerald-600 dark:text-emerald-500' },
+    { label: 'Pending Approval', value: approvalLogs.length.toString(), color: 'text-rose-600 dark:text-rose-500' },
   ];
 
-  // Penentuan data mana yang akan dirender berdasarkan tab yang aktif
   const displayedLogs = activeTab === 'pending' ? approvalLogs : historyLogs;
 
   return (
@@ -73,17 +61,17 @@ export default function HRDashboard() {
       {/* 1. HEADER SECTION */}
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-black text-white uppercase italic tracking-tighter">
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter">
             Human Resources <span className="text-red-600">Operations</span>
           </h1>
-          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.4em] mt-2">
+          <p className="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-[0.4em] mt-2">
             Centralized Personnel Management System
           </p>
         </div>
 
         <button 
           onClick={fetchLogs} 
-          className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/10 transition-all uppercase tracking-widest flex items-center gap-2"
+          className="px-4 py-2 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/10 shadow-sm transition-all uppercase tracking-widest flex items-center gap-2"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
           Refresh Data
@@ -93,8 +81,8 @@ export default function HRDashboard() {
       {/* 2. STATS GRID */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, i) => (
-          <div key={i} className="p-6 bg-slate-900/40 border border-white/5 rounded-[2rem] hover:border-red-600/30 transition-all group">
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">{stat.label}</p>
+          <div key={i} className="p-6 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-[2rem] shadow-xl shadow-slate-200/50 dark:shadow-none hover:border-red-600/30 transition-all group">
+            <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">{stat.label}</p>
             <p className={`text-4xl font-black tracking-tighter ${stat.color} group-hover:scale-105 transition-transform`}>
               {stat.value}
             </p>
@@ -102,41 +90,38 @@ export default function HRDashboard() {
         ))}
       </div>
 
-      {/* 3. MAIN CONTENT AREA (Dynamic Table with Tabs) */}
-      <div className="bg-slate-900/20 border border-white/5 rounded-[2.5rem] overflow-hidden">
-        <div className="p-6 border-b border-white/5 bg-white/[0.02] flex justify-between items-center">
-          <h3 className="text-[11px] font-black text-white uppercase tracking-widest">
+      {/* 3. MAIN CONTENT AREA */}
+      <div className="bg-white dark:bg-slate-900/20 border border-slate-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200/40 dark:shadow-none">
+        <div className="p-6 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02] flex justify-between items-center">
+          <h3 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest">
             {activeTab === 'pending' ? 'Pending Action Logs' : 'Action History Logs'}
           </h3>
           
-          {/* TOMBOL NAVIGASI TAB (Dua Titik) */}
           <div className="flex gap-2">
              <button 
                 onClick={() => setActiveTab('pending')}
-                className={`w-2 h-2 rounded-full transition-all cursor-pointer ${activeTab === 'pending' ? 'bg-red-600 animate-pulse scale-125' : 'bg-slate-700 hover:bg-slate-500'}`}
+                className={`w-2 h-2 rounded-full transition-all cursor-pointer ${activeTab === 'pending' ? 'bg-red-600 animate-pulse scale-125' : 'bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-500'}`}
                 title="View Pending Approvals"
              />
              <button 
                 onClick={() => setActiveTab('history')}
-                className={`w-2 h-2 rounded-full transition-all cursor-pointer ${activeTab === 'history' ? 'bg-red-600 animate-pulse scale-125' : 'bg-slate-700 hover:bg-slate-500'}`}
+                className={`w-2 h-2 rounded-full transition-all cursor-pointer ${activeTab === 'history' ? 'bg-red-600 animate-pulse scale-125' : 'bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-500'}`}
                 title="View Action History"
              />
           </div>
         </div>
         
-        {/* LOGIC TAMPILAN: Loading, Kosong, atau Ada Data */}
         <div className="p-2 transition-all duration-300">
           {isLoading ? (
-            <div className="p-10 text-center text-slate-500 text-sm animate-pulse">Scanning database...</div>
+            <div className="p-10 text-center text-slate-400 text-sm animate-pulse">Scanning database...</div>
           ) : displayedLogs.length === 0 ? (
-            // Tampilan kosong (disesuaikan berdasarkan tab)
             <div className="p-10 text-center">
-              <div className="inline-block p-4 rounded-full bg-slate-800/50 mb-4 border border-white/5">
-                 <svg className="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="inline-block p-4 rounded-full bg-slate-100 dark:bg-slate-800/50 mb-4 border border-slate-200 dark:border-white/5">
+                 <svg className="w-8 h-8 text-slate-300 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                  </svg>
               </div>
-              <h4 className="text-white font-bold text-sm">
+              <h4 className="text-slate-900 dark:text-white font-bold text-sm">
                 {activeTab === 'pending' ? 'System Clear' : 'No History Found'}
               </h4>
               <p className="text-[10px] text-slate-500 mt-1 max-w-xs mx-auto uppercase tracking-tighter">
@@ -146,25 +131,22 @@ export default function HRDashboard() {
               </p>
             </div>
           ) : (
-            // Tampilan List Data
-            <div className="divide-y divide-white/5">
+            <div className="divide-y divide-slate-100 dark:divide-white/5">
               {displayedLogs.map((log) => (
-                <div key={log.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors">
+                <div key={log.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
                   
-                  {/* Info Aksi */}
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
                       <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider rounded border ${
                         activeTab === 'pending' 
-                          ? 'bg-red-600/20 text-red-500 border-red-500/30' 
-                          : 'bg-slate-800 text-slate-400 border-slate-700'
+                          ? 'bg-red-50 dark:bg-red-600/20 text-red-600 dark:text-red-500 border-red-200 dark:border-red-500/30' 
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                       }`}>
                         {log.action}
                       </span>
-                      <span className="text-[10px] text-slate-500 font-mono">{log.time.split('.')[0]}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{log.time.split('.')[0]}</span>
                     </div>
-                    {/* Menampilkan isi data request user */}
-                    <p className="text-xs text-slate-300 font-mono mt-2 line-clamp-2 bg-[#020617] p-2 rounded border border-white/5">
+                    <p className="text-xs text-slate-700 dark:text-slate-300 font-mono mt-2 line-clamp-2 bg-slate-50 dark:bg-[#020617] p-3 rounded-xl border border-slate-200 dark:border-white/5">
                       {log.request}
                     </p>
                     <p className="text-[10px] text-slate-500 mt-2 italic">
@@ -172,30 +154,27 @@ export default function HRDashboard() {
                     </p>
                   </div>
 
-                  {/* Area Tombol atau Status */}
                   <div className="flex gap-2 shrink-0 items-center">
                     {activeTab === 'pending' ? (
-                      // Jika di tab Pending: Tampilkan tombol Approve/Reject
                       <>
                         <button 
                           onClick={() => handleApprovalAction(log.id, 'Rejected')}
-                          className="px-4 py-2 bg-slate-800/50 hover:bg-slate-700 text-slate-300 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors"
+                          className="px-4 py-2 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-colors"
                         >
                           Reject
                         </button>
                         <button 
                           onClick={() => handleApprovalAction(log.id, 'Approved')}
-                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-[0_0_15px_rgba(5,150,105,0.4)] transition-all active:scale-95"
+                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-lg shadow-emerald-500/30 transition-all active:scale-95"
                         >
                           Approve
                         </button>
                       </>
                     ) : (
-                      // Jika di tab History: Tampilkan Label Status Permanen (Bukan tombol)
                       <span className={`px-4 py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg border ${
                         log.status === 'Approved' 
-                          ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
-                          : 'bg-slate-800/50 text-slate-400 border-slate-700/50'
+                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border-emerald-200 dark:border-emerald-500/20' 
+                          : 'bg-slate-100 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700/50'
                       }`}>
                         {log.status}
                       </span>
@@ -207,7 +186,6 @@ export default function HRDashboard() {
           )}
         </div>
       </div>
-
     </div>
   );
 }

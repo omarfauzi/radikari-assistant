@@ -1,14 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..0,800;1,200..0,800&display=swap');
 @import "tailwindcss";
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+
+@layer base {
+  body {
+    /* FIX: Pakai bg-slate-100 supaya card putih di atasnya kelihatan 'keluar' */
+    @apply font-sans antialiased bg-slate-100 dark:bg-[#020617] text-slate-900 dark:text-slate-200 transition-colors duration-300;
+  }
+
+  /* Animasi halus untuk semua transisi tema */
+  h1, h2, h3, h4, h5, h6, p, span, div {
+    @apply transition-colors duration-300;
+  }
 }
+
+/* Scrollbar Style */
+.custom-scrollbar::-webkit-scrollbar { width: 5px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #ef4444;
+  @apply bg-slate-300 dark:bg-slate-800 rounded-full;
 }
